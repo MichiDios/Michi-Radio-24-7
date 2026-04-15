@@ -1,0 +1,155 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Radio App</title>
+
+<style>
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Card estilo app */
+.player {
+    width: 320px;
+    background: #181818;
+    border-radius: 25px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+/* Animación tipo equalizer */
+.equalizer {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 15px 0;
+}
+
+.bar {
+    width: 5px;
+    height: 20px;
+    background: #ff3c00;
+    animation: bounce 1s infinite ease-in-out;
+}
+
+.bar:nth-child(2) { animation-delay: 0.2s; }
+.bar:nth-child(3) { animation-delay: 0.4s; }
+.bar:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes bounce {
+    0%,100% { height: 10px; }
+    50% { height: 30px; }
+}
+
+/* Botón */
+button {
+    background: #ff3c00;
+    border: none;
+    padding: 12px 25px;
+    color: white;
+    font-size: 16px;
+    border-radius: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #ff5c2b;
+}
+
+/* Texto canción */
+.song {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #ccc;
+}
+
+/* Volumen */
+input[type="range"] {
+    width: 100%;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="player">
+    <h2>📻 Mi Radio</h2>
+
+    <audio id="radio"></audio>
+
+    <div class="equalizer">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <button onclick="toggleRadio()">▶️ Play</button>
+
+    <div class="song" id="song">Cargando canción...</div>
+
+    <input type="range" min="0" max="1" step="0.01" value="0.5"
+        onchange="setVolume(this.value)">
+</div>
+
+<script>
+const radio = document.getElementById("radio");
+const button = document.querySelector("button");
+const songText = document.getElementById("song");
+
+radio.src = "https://stream-153.zeno.fm/aqv7eadz908uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJhcXY3ZWFkejkwOHV2IiwiaG9zdCI6InN0cmVhbS0xNTMuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6IkRXT3hhVVdaU1VtSmFKWVc0MkF4Z3ciLCJpYXQiOjE3NzYyMzMwNjUsImV4cCI6MTc3NjIzMzEyNX0.AdvFevEuQMYKFzXewoo6hQGfZdCw8j2yB-Ic_IeWjHY";
+
+let playing = false;
+
+function toggleRadio() {
+    if (!playing) {
+        radio.play();
+        button.textContent = "⏸ Pause";
+    } else {
+        radio.pause();
+        button.textContent = "▶️ Play";
+    }
+    playing = !playing;
+}
+
+function setVolume(v) {
+    radio.volume = v;
+}
+
+/* 🔥 METADATA (Zeno API) */
+async function getSong() {
+    try {
+        const res = await fetch("https://api.zeno.fm/mounts/metadata/subscribe/aqv7eadz908uv");
+        const text = await res.text();
+
+        // Extraer info básica (puede variar según stream)
+        const match = text.match(/StreamTitle='([^']*)'/);
+
+        if (match && match[1]) {
+            songText.textContent = "🎵 " + match[1];
+        } else {
+            songText.textContent = "🎵 En vivo";
+        }
+    } catch {
+        songText.textContent = "🎵 En vivo";
+    }
+}
+
+/* Actualizar cada 10 segundos */
+setInterval(getSong, 10000);
+getSong();
+</script>
+
+</body>
+</html>
