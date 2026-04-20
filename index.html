@@ -1,154 +1,189 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Radio App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michi Console Radio PRO</title>
 
 <style>
-body {
-    margin: 0;
-    background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:monospace;
+    background:linear-gradient(270deg,#0f2027,#203a43,#2c5364,#1a2a6c);
+    background-size:600% 600%;
+    animation:bgMove 12s infinite;
 }
 
-/* Card estilo app */
-.player {
-    width: 320px;
-    background: #181818;
-    border-radius: 25px;
-    padding: 25px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+@keyframes bgMove{
+    0%{background-position:0%}
+    50%{background-position:100%}
+    100%{background-position:0%}
 }
 
-/* Animación tipo equalizer */
-.equalizer {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    margin: 15px 0;
+/* CONSOLA */
+.console{
+    width:90%;
+    max-width:500px;
+    background:#0b0b12;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(0,255,200,0.2);
 }
 
-.bar {
-    width: 5px;
-    height: 20px;
-    background: #ff3c00;
-    animation: bounce 1s infinite ease-in-out;
+/* HEADER */
+.header{
+    padding:12px;
+    display:flex;
+    gap:10px;
 }
 
-.bar:nth-child(2) { animation-delay: 0.2s; }
-.bar:nth-child(3) { animation-delay: 0.4s; }
-.bar:nth-child(4) { animation-delay: 0.6s; }
-
-@keyframes bounce {
-    0%,100% { height: 10px; }
-    50% { height: 30px; }
+/* FOCOS */
+.dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    animation:beat 1s infinite;
 }
 
-/* Botón */
-button {
-    background: #ff3c00;
-    border: none;
-    padding: 12px 25px;
-    color: white;
-    font-size: 16px;
-    border-radius: 15px;
-    cursor: pointer;
-    margin-top: 10px;
+.red{background:#ff5f56;}
+.yellow{background:#ffbd2e; animation-delay:0.2s;}
+.green{background:#27c93f; animation-delay:0.4s;}
+
+@keyframes beat{
+    0%,100%{transform:scale(1);opacity:1;}
+    50%{transform:scale(1.4);opacity:0.5;}
 }
 
-button:hover {
-    background: #ff5c2b;
+/* TERMINAL */
+.code{
+    padding:20px;
+    min-height:150px;
+    color:#00ffc3;
+    text-shadow:0 0 8px #00ffc3;
 }
 
-/* Texto canción */
-.song {
-    font-size: 14px;
-    margin-top: 10px;
-    color: #ccc;
+/* BOTÓN */
+.controls{
+    display:flex;
+    justify-content:center;
+    padding:20px;
 }
 
-/* Volumen */
-input[type="range"] {
-    width: 100%;
-    margin-top: 10px;
+.play-btn{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#00ffc3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.icon{
+    width:0;
+    height:0;
+    border-left:20px solid #000;
+    border-top:12px solid transparent;
+    border-bottom:12px solid transparent;
+}
+
+/* PAUSE */
+.playing .icon{
+    width:20px;
+    height:20px;
+    border:none;
+    position:relative;
+}
+
+.playing .icon::before,
+.playing .icon::after{
+    content:'';
+    position:absolute;
+    width:6px;
+    height:20px;
+    background:#000;
+}
+
+.playing .icon::before{left:0;}
+.playing .icon::after{right:0;}
+
+/* PULSO */
+.playing{
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(0,255,195,0.6);}
+    70%{box-shadow:0 0 0 20px rgba(0,255,195,0);}
+    100%{box-shadow:0 0 0 0 rgba(0,255,195,0);}
 }
 </style>
 </head>
 
 <body>
 
-<div class="player">
-    <h2>📻 Mi Radio</h2>
+<div class="console">
 
-    <audio id="radio"></audio>
-
-    <div class="equalizer">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
+    <div class="header">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
     </div>
 
-    <button onclick="toggleRadio()">▶️ Play</button>
+    <div class="code" id="terminal"></div>
 
-    <div class="song" id="song">Cargando canción...</div>
+    <div class="controls">
+        <div class="play-btn" id="btn" onclick="toggleRadio()">
+            <div class="icon"></div>
+        </div>
+    </div>
 
-    <input type="range" min="0" max="1" step="0.01" value="0.5"
-        onchange="setVolume(this.value)">
 </div>
 
+<audio id="radio" src="https://stream-178.zeno.fm/f3wvbbqmdg8uv"></audio>
+
 <script>
+/* TEXTO ANIMADO */
+const text = `
+{
+  "status": true,
+  "radio": "Michi 24/7",
+  "mode": "live streaming",
+  "signal": "strong"
+}
+`;
+
+let i = 0;
+const terminal = document.getElementById("terminal");
+
+function typing(){
+    if(i < text.length){
+        terminal.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typing, 25);
+    }
+}
+typing();
+
+/* RADIO */
 const radio = document.getElementById("radio");
-const button = document.querySelector("button");
-const songText = document.getElementById("song");
+const btn = document.getElementById("btn");
 
-radio.src = "https://stream-153.zeno.fm/aqv7eadz908uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJhcXY3ZWFkejkwOHV2IiwiaG9zdCI6InN0cmVhbS0xNTMuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6IkRXT3hhVVdaU1VtSmFKWVc0MkF4Z3ciLCJpYXQiOjE3NzYyMzMwNjUsImV4cCI6MTc3NjIzMzEyNX0.AdvFevEuQMYKFzXewoo6hQGfZdCw8j2yB-Ic_IeWjHY";
-
-let playing = false;
-
-function toggleRadio() {
-    if (!playing) {
+function toggleRadio(){
+    if(radio.paused){
         radio.play();
-        button.textContent = "⏸ Pause";
-    } else {
+        btn.classList.add("playing");
+    }else{
         radio.pause();
-        button.textContent = "▶️ Play";
-    }
-    playing = !playing;
-}
-
-function setVolume(v) {
-    radio.volume = v;
-}
-
-/* 🔥 METADATA (Zeno API) */
-async function getSong() {
-    try {
-        const res = await fetch("https://api.zeno.fm/mounts/metadata/subscribe/aqv7eadz908uv");
-        const text = await res.text();
-
-        // Extraer info básica (puede variar según stream)
-        const match = text.match(/StreamTitle='([^']*)'/);
-
-        if (match && match[1]) {
-            songText.textContent = "🎵 " + match[1];
-        } else {
-            songText.textContent = "🎵 En vivo";
-        }
-    } catch {
-        songText.textContent = "🎵 En vivo";
+        btn.classList.remove("playing");
     }
 }
-
-/* Actualizar cada 10 segundos */
-setInterval(getSong, 10000);
-getSong();
 </script>
 
 </body>
